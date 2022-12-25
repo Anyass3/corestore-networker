@@ -21,6 +21,7 @@ test('simple replication', async (t) => {
   const core1 = store1.get({ name: name() });
   await core1.ready();
   const core2 = store2.get({ key: core1.key });
+  await core2.ready();
 
   await networker1.configure(core1.discoveryKey);
   await networker2.configure(core2.discoveryKey);
@@ -253,7 +254,7 @@ test('peers are correctly added/removed', async (t) => {
   await cleanup([networker1]);
   t.end();
 });
-
+// hmm sorry no more extensions
 // test('can register stream-wide extensions', async (t) => {
 //   const { networker: networker1 } = await create();
 //   const { networker: networker2 } = await create();
@@ -526,31 +527,32 @@ test('onauthenticate hook', async (t) => {
   t.end();
 });
 
-const getBootstrap = ({ address, port }) => ({ host: address, port });
+const getBootstrap = ({ address, port, ...rest }) => ({ ...rest, host: address || '0.0.0.0', port });
 async function create(opts = {}) {
-  if (!bootstrap_nodes) {
-    bootstrapper1 = DHT.bootstrapper(BOOTSTRAP_PORTS[0], { ephemeral: true, bootstrap: [] });
-    await bootstrapper1.ready();
+  // if (!bootstrap_nodes) {
+  //   bootstrapper1 = DHT.bootstrapper(BOOTSTRAP_PORTS[0], '0.0.0.0', { ephemeral: true, bootstrap: [] });
+  //   await bootstrapper1.ready();
+  //   console.log('bootstrapper1', bootstrapper1)
 
-    bootstrapper2 = DHT.bootstrapper(BOOTSTRAP_PORTS[1], {
-      bootstrap: [getBootstrap(bootstrapper1.address())],
-      ephemeral: false,
-    });
+  //   bootstrapper2 = DHT.bootstrapper(BOOTSTRAP_PORTS[1], '0.0.0.0', {
+  //     bootstrap: [getBootstrap(bootstrapper1.address())],
+  //     ephemeral: false,
+  //   });
 
-    await bootstrapper2.ready();
+  //   await bootstrapper2.ready();
 
-    bootstrap_nodes = [
-      getBootstrap(bootstrapper1.address()),
-      getBootstrap(bootstrapper2.address()),
-    ];
-    console.log('listening', bootstrap_nodes);
-  }
+  //   bootstrap_nodes = [
+  //     getBootstrap(bootstrapper1.address()),
+  //     getBootstrap(bootstrapper2.address()),
+  //   ];
+  //   console.log('listening', bootstrap_nodes);
+  // }
   const store = new Corestore(ram);
   await store.ready();
 
   const networker = new CorestoreNetworker(store, {
     ...opts,
-    bootstrap: bootstrap_nodes,
+    // bootstrap: bootstrap_nodes,
   });
 
   return { store, networker };
