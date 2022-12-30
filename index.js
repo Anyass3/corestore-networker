@@ -150,14 +150,14 @@ class CorestoreNetworker extends Nanoresource {
 
     this.swarm.on('error', (err) => this.emit('error', err));
     this.swarm.on('connection', (socket, info) => {
-      const isInitiator = !!info.client;
+      // Hmm, is this check needed?
       if (socket.remoteAddress === '::ffff:127.0.0.1' || socket.remoteAddress === '127.0.0.1')
         return null;
 
       var finishedHandshake = false;
       var processed = false;
 
-      const protocolStream = Hypercore.createProtocolStream(isInitiator, {
+      const protocolStream = Hypercore.createProtocolStream(socket.isInitiator, {
         ...this._replicationOpts,
       });
       protocolStream.on('handshake', () => {
